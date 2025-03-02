@@ -46,6 +46,28 @@ export default defineConfig({
     // },
     nav: [
       { text: "首页", link: "/" },
+      {
+        text: "前端学习",
+        items: [
+          {
+            text: "源码学习",
+            items: [
+              {
+                text: "React",
+                link: "/frontend/source/react/",
+              },
+              {
+                text: "Vue",
+                link: "/frontend/source/vue/",
+              },
+            ],
+          },
+          {
+            text: "技术文章",
+            link: "/frontend/technology/",
+          },
+        ],
+      },
       // { text: "关于作者", link: "https://sugarat.top/aboutme.html" },
     ],
     socialLinks: [

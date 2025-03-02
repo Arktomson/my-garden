@@ -58,10 +58,10 @@ pnpm serve
 
 ```ts
 // 省略无关代码
-const base = '/vitepress-blog-sugar-template/'
+const base = "/vitepress-blog-sugar-template/";
 export default defineConfig({
   base,
-})
+});
 ```
 
 ④ 推送 `main` 分支即可
