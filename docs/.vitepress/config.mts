@@ -70,6 +70,10 @@ export default defineConfig({
       },
       // { text: "关于作者", link: "https://sugarat.top/aboutme.html" },
     ],
+    editLink: {
+      pattern: "https://github.com/Arktomson/my-garden/tree/main/docs/:path",
+      text: "去 GitHub 上编辑内容",
+    },
     socialLinks: [
       {
         icon: "github",

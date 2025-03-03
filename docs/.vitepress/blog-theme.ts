@@ -61,6 +61,12 @@ const blogTheme = getThemeConfig({
         "https://img.cdn.sugarat.top/mdImg/MTY3NDk5NTE2NzAzMA==674995167030",
       url: "https://sugarat.top",
     },
+    {
+      nickname: "栗生",
+      des: "what's fuck",
+      avatar: "https://shengzhang-blog.oss-cn-hangzhou.aliyuncs.com/gq7jcl.png",
+      url: "https://tanjiahao24.github.io/blog/",
+    },
   ],
 
   // 公告
@@ -79,6 +85,13 @@ const blogTheme = getThemeConfig({
       },
     ],
     duration: 0,
+  },
+  buttonAfterArticle: {
+    openTitle: '投"币"支持',
+    closeTitle: "下次一定",
+    content:
+      '<img src="https://shengzhang-blog.oss-cn-hangzhou.aliyuncs.com/qpohgh.png">',
+    icon: "wechatPay",
   },
 });
 
