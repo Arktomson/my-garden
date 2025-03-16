@@ -286,6 +286,8 @@ function App() {
 :::code-group
 
 ```javascript [createElement.js]
+const REACT_ELEMENT = Symbol("react.element");
+
 const excludeProps = ["key", "ref", "__self", "__source"];
 
 function createElement(type, props, ...children) {
