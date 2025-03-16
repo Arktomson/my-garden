@@ -10,6 +10,4 @@
 
 # React 源码学习
 
-:::info
-记录 React 源码学习 1
-:::
+记录React源码的学习

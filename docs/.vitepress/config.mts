@@ -29,7 +29,7 @@ export default defineConfig({
   themeConfig: {
     // 展示 2,3 级标题在目录中
     outline: {
-      level: [2, 3],
+      level: "deep",
       label: "目录",
     },
     // 默认文案修改
@@ -67,6 +67,10 @@ export default defineConfig({
             link: "/frontend/technology/",
           },
         ],
+      },
+      {
+        text: "其他",
+        link: "/other/",
       },
       // { text: "关于作者", link: "https://sugarat.top/aboutme.html" },
     ],

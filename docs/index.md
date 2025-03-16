@@ -5,7 +5,7 @@ blog:
   name: "百里静修的花园"
   motto: 君子终日乾乾，夕惕若厉
   inspiring:
-    - 千万不要因为走得太久，而忘记了我们为什么出发
+    - 我们走的太远，以致于忘记了为什么出发
     - 转瞬即逝、似有若无、无果之路
   # 设置 inspiringTimeout 可以实现自动切换
   inspiringTimeout: 4000
