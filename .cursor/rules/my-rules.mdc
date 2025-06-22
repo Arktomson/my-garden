@@ -1,0 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+1. this is blog project based on vitepress，theme used another extension package so it will have some additional document writing functions and additional frontmatter syntax
+2. always response with chinese
+3. following is reference document for writing md files in vitepress and theme extension packages，https://theme.sugarat.top/config/frontmatter.html、https://theme.sugarat.top/config/component.html、https://vitepress.dev/zh/reference/frontmatter-config#editlink、https://vitepress.dev/zh/guide/markdown#advanced-configuration

@@ -93,6 +93,7 @@ const blogTheme = getThemeConfig({
       '<img src="https://shengzhang-blog.oss-cn-hangzhou.aliyuncs.com/qpohgh.png">',
     icon: "wechatPay",
   },
+  mermaid: true,
 });
 
 export { blogTheme };
