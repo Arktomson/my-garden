@@ -63,8 +63,12 @@ export default defineConfig({
             ],
           },
           {
-            text: "技术文章",
-            link: "/frontend/technology/",
+            text: "其他",
+            link: "/frontend/other/",
+          },
+          {
+            text: "前端基础",
+            link: "/frontend/base/",
           },
           {
             text: "组件库",
