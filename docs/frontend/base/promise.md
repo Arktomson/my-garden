@@ -21,5 +21,65 @@ title: promise
 3. 当处于pending状态时，无法得知目前进展到哪一个阶段（刚刚开始还是即将完成）。(文件上传可以使用fetch的onProgress方法)
 
 ## 4. promise 的实现
+[Promise A+规范-中文](https://www.cnblogs.com/gupingan/p/18628539)
 
-1. 
+[Promise A+规范-英文](https://promisesaplus.com/)
+
+### Stage 1
+
+1. Promise是一个类，使用的时候需要new Promise来产生一个promise实例
+2. 构造函数中需要传递一个参数 executor函数，executor立即执行，executor中有两个参数  resolve(value)  reject(reason)，调用resolve会让promise变成成功 调用reject会变成失败  pending等待态 fulfilled 成功态  rejected失败态，一但状态发生变化后不能再修改状态,如果不调用resolve此时promise不会成功也不会失败 （如果发生异常也会认为是失败）
+3. 每个promise实例都有一个then方法，会有两个参数 onfulfilled， onrjected，onfulfilled是成功状态resolve调用后的回调，onrjected是失败回调reject调用后的回调
+
+```js[stage1.js]
+const PENDING = 'pending';
+const FULFILLED = 'fulfilled';
+const REJECTED = 'rejected';
+class Promise {
+    constructor(executor) {
+        this.state = PENDING;
+        this.value = undefined;
+        this.reason = undefined;
+        const resolve = (value) => {
+            if (this.state === PENDING) {
+                this.state = FULFILLED;
+                this.value = value;
+            }
+        }   
+        const reject = (reason) => {
+            if (this.state === PENDING) {
+                this.state = REJECTED;
+                this.reason = reason;
+            }
+        }
+        try {   
+            executor(resolve, reject);
+        } catch (error) {
+            reject(error);
+        }
+    }
+    then(onFulfilled, onRejected) {
+        if (this.state === FULFILLED) {
+            onFulfilled(this.value);
+        }
+        if (this.state === REJECTED) {
+            onRejected(this.reason);
+        }
+    }
+}
+```
+
+### Stage 2
+
+1. executor中异步任务场景的处理
+2. 多次调用then方法，需要将回调函数存储起来
+3. then方法中resolve和reject回调是微任务
+4. then方法可以链式调用，返回的是新的promise实例，这个promise的状态是根据什么来决定的？
+    * 如果返回的内容是普通值（不是promise，不是throw Error） 都会走下一次的成功
+    * 如果onFulfilled  onRejected 在执行过程中出错了，会走下一次then的失败
+    * 如果返回的是一个promise，会根据这个promise的状态来决定下一次then的状态
+        * 如果返回的promise和当前promise是同一个，抛出循环报错
+
+```js[stage2.js]
+
+```
