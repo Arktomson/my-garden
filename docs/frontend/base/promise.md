@@ -288,7 +288,7 @@ Promise.reject = function(reason) {
     });
 }
 ```
-
+* resolve方法为了配合Promise.resolve方法，需要处理参数是promise的情况，正常使用resolve的时候，也处理了这种情况
 ```js[promise.js]{50-52}
 // 1. executor 立即执行，异步任务场景的处理，以及多次调用then方法，需要将回调函数存储起来
 // 2. then方法链式回调
@@ -428,20 +428,267 @@ Promise.catch = function(onRejected) {
 ```
 
 ### finally
-finally的参数是一个函数，这个函数不管promise是成功还是失败，都会执行
+* 提供一个“无论成功还是失败都要执行的收尾钩子
+* 只在 原 Promise 已经 settled（fulfilled / rejected）后调用 onFinally
+* onFinally 不接收 上一步的值/错，也无法篡改它
+* 除非 onFinally 自己抛异常或返回一个 rejected Promise，否则最终链路会把 原来的结果 原封不动地传下去
 
 ```js[finally.js]
-Promise.finally = function(callback) {
+Promise.prototype.finally = function (callback) {
     return this.then(
         (value) => Promise.resolve(callback()).then(() => value),
         (reason) => Promise.resolve(callback()).then(() => { throw reason })
-    );
+    )
 }
 ```
 
 ### all
-all的参数是一个数组，数组中可以放promise，也可以放普通值，返回的是一个promise，这个promise的状态是根据数组中所有promise的状态来决定的
+all的参数是一个数组，数组中可以放promise，也可以放普通值，返回的是一个promise，这个promise的状态是根据数组中所有promise的状态来决定的,如果有任何一个失败，则返回的promise失败，如果都成功，则返回的promise成功
 
 ```js[all.js]
+Promise.all = (promises) => {
+  promises = promises.map((promise) => {
+    if (promise instanceof Promise) {
+      return promise;
+    }
+    return Promise.resolve(promise);
+  });
+  return new Promise((resolve, reject) => {
+    let result = [];
+    let count = 0;
+    promises.forEach((promise, index) => {
+      promise.then(
+        (val) => {
+          result[index] = val;
+          count++;
+          if (count === promises.length) {
+            resolve(result);
+          }
+        },
+        (err) => {
+          reject(err);
+        }
+      );
+    });
+  });
+};
+
+module.exports = Promise;
+```
+### allSettled
+allSettled的参数是一个数组，数组中可以放promise，也可以放普通值，返回的是一个promise，这个promise的状态是根据数组中所有promise的状态来决定的，不管成功还是失败，都会返回一个数组，数组中是每个promise的结果
+
+```js[allSettled.js]
+Promise.allSettled = (promises) => {
+  return new Promise((resolve, reject) => {
+    let result = [];
+    let count = 0;
+    promises.forEach((promise, index) => {
+      promise.then(
+        (val) => {
+          result[index] = { status: 'fulfilled', value: val };
+          count++;
+          if (count === promises.length) {
+            resolve(result);
+          }
+        },
+        (err) => {
+          result[index] = { status: 'rejected', reason: err };
+          count++;
+          if (count === promises.length) {
+            resolve(result);
+          }
+        }
+      );
+    });
+  });
+};
+```
+
+### race
+race的参数是一个数组，数组中可以放promise，也可以放普通值，返回的是一个promise，这个promise的状态是根据数组中第一个完成的promise的状态来决定的,不管成功还是失败，就返回这个结果
+
+```js[race.js]
+Promise.race = (promises) => {
+    promises = promises.map((promise)=>{
+        if(promise instanceof Promise){
+            return promise
+        }
+        return Promise.resolve(promise)
+    })
+    return new Promise((resolve,reject)=>{
+        promises.forEach((promise)=>{
+            promise.then(resolve,reject)
+        })
+    })
+}
 
 ```
+#### 应用
+* 超时处理
+```js[timeout.js]
+const withSetTimeout = (promise,timeout) => {
+    return Promise.race([
+        promise,
+        new Promise((resolve, reject) => {
+            setTimeout(() => {
+                reject(new Error('timeout'))
+            }, timeout)
+        })
+    ])
+}
+const p = withSetTimeout(new Promise((resolve, reject) => {
+    setTimeout(() => {
+        resolve('success')
+    }, 1000)
+}), 500)
+p.then((res) => {
+    console.log(res)
+}).catch((err) => {
+    console.log(err)
+})
+```
+* 手动取消
+```js[cancel.js]
+const withAbort = (promise) => {
+    const {promise:p,resolve,reject} = Promise.withResolvers()
+    const res = Promise.race([
+        promise,
+        p
+    ])
+    res.abort = reject
+    return res
+}
+const promise = new Promise((resolve, reject) => {
+    setTimeout(() => {
+        resolve('success')
+    }, 1000)
+})
+const p = withAbort(promise)
+
+p.then((res) => {
+    console.log(res)
+}).catch((err) => {
+    console.log(err)
+})
+setTimeout(() => {
+    p.abort()
+}, 100)
+```
+
+### any
+any的参数是一个数组，数组中可以放promise，也可以放普通值，返回的是一个promise，如果有任何一个成功，则返回的promise成功，如果都失败，返回一个AggregateError错误
+
+```js[any.js]
+Promise.any = (promises) => {
+    promises = promises.map((promise)=>{
+        if(promise instanceof Promise){
+            return promise
+        }
+        return Promise.resolve(promise)
+    })
+    let len = promises.length
+    return new Promise((resolve,reject)=>{
+        let count = 0
+        promises.forEach((promise)=>{
+            promise.then((val)=>{
+                resolve(val)
+            },(err)=>{
+                count++
+                if(count === len){
+                    reject(new Error('AggregateError'))
+                }
+            })
+        })
+    })
+}
+```
+
+### try
+```js[try.js]
+是用于捕获代码内同步的错误并丢给 catch
+Promise.try = function(fn) {
+    return new Promise((resolve, reject) => {
+        try {
+            let result = fn();
+            if (result instanceof Promise) {
+                result.then(resolve, reject);
+            } else {
+                resolve(result);
+            }
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+// sample:
+Promise.try(() => { 
+    throw new Error('error')
+}).catch((err) => {
+    console.log(err)
+})
+```
+
+### withResolvers
+* 方便resolve，reject方法在promise外部调用
+```js[withResolvers.js]
+Promise.withResolvers = function() {
+    let resolve, reject;
+    return {
+        promise: new Promise((resolve, reject) => {
+            resolve = resolve;
+            reject = reject;
+        }),
+        resolve,
+        reject
+    }
+}
+```
+
+## promisify
+> 将回调函数的形式转换为 promise 的形式
+
+### 常见的手动封装方式
+```js[commonjs.js]
+const fs = require('fs')
+const readFile = (path) => {
+    return new Promise((resolve, reject) => {
+        fs.readFile(path, (err, data) => {
+            if (err) reject(err)
+            resolve(data)
+        })
+    })
+}
+
+readFile('test.txt').then((data) => {
+    console.log(data)
+}).catch((err) => {
+    console.log(err)
+})
+```
+### 统一处理回调函数 也是基于node的api风格的封装
+```js[promiseify.js]
+const fs = require('fs')
+
+function promisify(fn) {
+    return function(...args) {
+        return new Promise((resolve, reject) => {
+            fn(...args, (err, data) => {
+                if (err) reject(err)
+                resolve(data)
+            })
+        })
+    }
+}
+const readFile = promisify(fs.readFile)
+readFile('test.txt').then((data) => {
+    console.log(data)
+}).catch((err) => {
+    console.log(err)
+})
+```
+
+
+
+
+
