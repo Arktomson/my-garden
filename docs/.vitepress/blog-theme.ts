@@ -84,7 +84,9 @@ const blogTheme = getThemeConfig({
         content: "欢迎私信交流 | 商务合作",
       },
     ],
-    duration: 0,
+    duration: -1,
+    // twinkle: true,
+    reopen: true,
   },
   buttonAfterArticle: {
     openTitle: '投"币"支持',

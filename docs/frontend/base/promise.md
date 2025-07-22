@@ -1,5 +1,8 @@
 ---
 title: promise
+description: 讲解promise的实现和应用
+tag: 前端基础
+sticky: -1
 ---
 
 # promise
