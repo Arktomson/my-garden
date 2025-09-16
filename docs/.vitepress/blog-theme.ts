@@ -28,6 +28,17 @@ const blogTheme = getThemeConfig({
   // mermaid: true
 
   // 页脚
+  comment: {
+    type: "giscus",
+    options: {
+      repo: "arktomson/my-garden-discussion",
+      repoId: "R_kgDOPxFSQQ",
+      category: "Announcements",
+      categoryId: "DIC_kwDOPxFSQc4CvhLl",
+      inputPosition: "top",
+    },
+    mobileMinify: true,
+  },
   footer: {
     // message 字段支持配置为HTML内容，配置多条可以配置为数组
     // message: '下面 的内容和图标都是可以修改的噢（当然本条内容也是可以隐藏的）',
