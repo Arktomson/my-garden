@@ -31,10 +31,10 @@ const blogTheme = getThemeConfig({
   comment: {
     type: "giscus",
     options: {
-      repo: "arktomson/my-garden-discussion",
-      repoId: "R_kgDOPxFSQQ",
+      repo: "Arktomson/my-garden",
+      repoId: "R_kgDON2oFdQ",
       category: "Announcements",
-      categoryId: "DIC_kwDOPxFSQc4CvhLl",
+      categoryId: "DIC_kwDON2oFdc4CviWU",
       inputPosition: "top",
     },
     mobileMinify: true,
