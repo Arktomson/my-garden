@@ -1,37 +1,40 @@
 ---
 description: 讲解promise的实现和应用
 tag: 前端基础
-sticky: -1
+sticky: 1
 ---
 
 # Promise
 
 ## 1. promise 是什么
 
-* promise 是异步编程的一种解决方案，promise js中用于处理“异步”操作的“对象”，编写代码变得更加“优雅”，比传统的解决方案——回调函数和事件——更合理和更强大。
-* promise相当于预定好了 成功和失败，异步操作完成后会调用约定好的内容“发布订阅”，只是在回调的基础上增加了封装和抽象
+- promise 是异步编程的一种解决方案，promise js 中用于处理“异步”操作的“对象”，编写代码变得更加“优雅”，比传统的解决方案——回调函数和事件——更合理和更强大。
+- promise 相当于预定好了 成功和失败，异步操作完成后会调用约定好的内容“发布订阅”，只是在回调的基础上增加了封装和抽象
 
-## 2. 有了promise解决了哪些问题?
+## 2. 有了 promise 解决了哪些问题?
+
 1. 统一了异步编程的范式，在 Promise 出现之前，开发者需要使用回调、事件监听、定时器等方式处理异步操作，这些方式各自独立，缺乏统一性。
-2. 回调地狱问题，恶魔金字塔，嵌套层级很深，难以控制。 promise中有链式调用,配合async await 可以解决回调地狱问题
-3. 错误问题，无法统一处理。 promise提供了catch方法可以优雅管理的错误
-4. 并发问题，早期可以采用计数器的方式。 promise中提供了很多好用的方法 Promise.all finally allSettled
+2. 回调地狱问题，恶魔金字塔，嵌套层级很深，难以控制。 promise 中有链式调用,配合 async await 可以解决回调地狱问题
+3. 错误问题，无法统一处理。 promise 提供了 catch 方法可以优雅管理的错误
+4. 并发问题，早期可以采用计数器的方式。 promise 中提供了很多好用的方法 Promise.all finally allSettled
 
 ## 3. promise 缺点
-1. 无法取消promise，一旦新建它就会立即执行，无法中途取消。(使用AbortController可以取消)
-2. 如果不设置回调函数，promise内部抛出的错误，不会反应到外部。(then方法中抛出的错误，如果没有catch方法，会吞掉错误)
-3. 当处于pending状态时，无法得知目前进展到哪一个阶段（刚刚开始还是即将完成）。(文件上传可以使用fetch的onProgress方法)
+
+1. 无法取消 promise，一旦新建它就会立即执行，无法中途取消。(使用 AbortController 可以取消)
+2. 如果不设置回调函数，promise 内部抛出的错误，不会反应到外部。(then 方法中抛出的错误，如果没有 catch 方法，会吞掉错误)
+3. 当处于 pending 状态时，无法得知目前进展到哪一个阶段（刚刚开始还是即将完成）。(文件上传可以使用 fetch 的 onProgress 方法)
 
 ## 4. promise 的实现
+
 [Promise A+规范-中文](https://www.cnblogs.com/gupingan/p/18628539)
 
 [Promise A+规范-英文](https://promisesaplus.com/)
 
 ### Stage 1
 
-1. Promise是一个类，使用的时候需要new Promise来产生一个promise实例
-2. 构造函数中需要传递一个参数 executor函数，executor立即执行，executor中有两个参数  resolve(value)  reject(reason)，调用resolve会让promise变成成功 调用reject会变成失败  pending等待态 fulfilled 成功态  rejected失败态，一但状态发生变化后不能再修改状态,如果不调用resolve此时promise不会成功也不会失败 （如果发生异常也会认为是失败）
-3. 每个promise实例都有一个then方法，会有两个参数 onfulfilled， onrjected，onfulfilled是成功状态resolve调用后的回调，onrjected是失败回调reject调用后的回调
+1. Promise 是一个类，使用的时候需要 new Promise 来产生一个 promise 实例
+2. 构造函数中需要传递一个参数 executor 函数，executor 立即执行，executor 中有两个参数 resolve(value) reject(reason)，调用 resolve 会让 promise 变成成功 调用 reject 会变成失败 pending 等待态 fulfilled 成功态 rejected 失败态，一但状态发生变化后不能再修改状态,如果不调用 resolve 此时 promise 不会成功也不会失败 （如果发生异常也会认为是失败）
+3. 每个 promise 实例都有一个 then 方法，会有两个参数 onfulfilled， onrjected，onfulfilled 是成功状态 resolve 调用后的回调，onrjected 是失败回调 reject 调用后的回调
 
 ```js[stage1.js]
 const PENDING = 'pending';
@@ -47,14 +50,14 @@ class Promise {
                 this.state = FULFILLED;
                 this.value = value;
             }
-        }   
+        }
         const reject = (reason) => {
             if (this.state === PENDING) {
                 this.state = REJECTED;
                 this.reason = reason;
             }
         }
-        try {   
+        try {
             executor(resolve, reject);
         } catch (error) {
             reject(error);
@@ -73,11 +76,9 @@ class Promise {
 
 ### Stage 2
 
-1. executor中异步任务场景的处理
-2. 多次调用then方法，需要将回调函数存储起来
-3. then方法中resolve和reject回调是微任务
-
-
+1. executor 中异步任务场景的处理
+2. 多次调用 then 方法，需要将回调函数存储起来
+3. then 方法中 resolve 和 reject 回调是微任务
 
 ```js[stage2.js]
 const PENDING = 'pending';
@@ -137,19 +138,19 @@ class Promise {
   }
 }
 ```
-     
+
 ### Stage 3
 
-1. 实现then方法可以链式调用，返回的是新的promise实例，这个promise的状态是根据什么来决定的？
-    * 如果返回的内容是普通值（不是promise，不是throw Error） 都会走下一次的成功
-    * 如果onFulfilled  onRejected 在执行过程中出错了，会走下一次then的失败
-    * 如果返回的是一个promise，会根据这个promise的状态来决定下一次then的状态
-        * 如果返回的promise和当前promise是同一个，抛出循环报错
-        * 如果是对象或者函数，会尝试调用then方法
-            * 因为then方法中传递过来的可能还是一个promise，所以需要递归调用then方法
-            * 取then方法，不要多次使用x.then()，因为可能then是一个getter，调用后可能then的值就变了，拿到第一次x.then的结果，进行判断，然后then.call调用，不要多次取，两个then有可能是不一样的
-            * 别人的promise可能多次resolve，reject，且then方法写的有问题，所以需要判断是否是第一次调用，是第一次调用才resolve或reject
-    * then的入参如果是空，onResolve替换为value => value透传参数，onRejected替换为reason => throw reason，防止then方法中没有入参
+1. 实现 then 方法可以链式调用，返回的是新的 promise 实例，这个 promise 的状态是根据什么来决定的？
+   - 如果返回的内容是普通值（不是 promise，不是 throw Error） 都会走下一次的成功
+   - 如果 onFulfilled onRejected 在执行过程中出错了，会走下一次 then 的失败
+   - 如果返回的是一个 promise，会根据这个 promise 的状态来决定下一次 then 的状态
+     - 如果返回的 promise 和当前 promise 是同一个，抛出循环报错
+     - 如果是对象或者函数，会尝试调用 then 方法
+       - 因为 then 方法中传递过来的可能还是一个 promise，所以需要递归调用 then 方法
+       - 取 then 方法，不要多次使用 x.then()，因为可能 then 是一个 getter，调用后可能 then 的值就变了，拿到第一次 x.then 的结果，进行判断，然后 then.call 调用，不要多次取，两个 then 有可能是不一样的
+       - 别人的 promise 可能多次 resolve，reject，且 then 方法写的有问题，所以需要判断是否是第一次调用，是第一次调用才 resolve 或 reject
+   - then 的入参如果是空，onResolve 替换为 value => value 透传参数，onRejected 替换为 reason => throw reason，防止 then 方法中没有入参
 
 ```js[stage3.js]
 const PENDING = 'pending';
@@ -274,7 +275,9 @@ class Promise {
 ## promise 常用方法
 
 ### Promise.resolve & reject
-* resolve的参数如果是一个promise，会等待这个promise执行完，并把结果传递给下一个then
+
+- resolve 的参数如果是一个 promise，会等待这个 promise 执行完，并把结果传递给下一个 then
+
 ```js[resolve.js]
 Promise.resolve = function(value) {
     return new Promise((resolve, reject) => {
@@ -282,7 +285,9 @@ Promise.resolve = function(value) {
     });
 }
 ```
-* reject不关心参数，直接reject
+
+- reject 不关心参数，直接 reject
+
 ```js[reject.js]
 Promise.reject = function(reason) {
     return new Promise((resolve, reject) => {
@@ -290,7 +295,9 @@ Promise.reject = function(reason) {
     });
 }
 ```
-* resolve方法为了配合Promise.resolve方法，需要处理参数是promise的情况，正常使用resolve的时候，也处理了这种情况
+
+- resolve 方法为了配合 Promise.resolve 方法，需要处理参数是 promise 的情况，正常使用 resolve 的时候，也处理了这种情况
+
 ```js[promise.js]{50-52}
 // 1. executor 立即执行，异步任务场景的处理，以及多次调用then方法，需要将回调函数存储起来
 // 2. then方法链式回调
@@ -421,6 +428,7 @@ module.exports = Promise;
 ```
 
 ### catch
+
 实际也就是一个语法糖
 
 ```js[catch.js]
@@ -430,10 +438,11 @@ Promise.catch = function(onRejected) {
 ```
 
 ### finally
-* 提供一个“无论成功还是失败都要执行的收尾钩子
-* 只在 原 Promise 已经 settled（fulfilled / rejected）后调用 onFinally
-* onFinally 不接收 上一步的值/错，也无法篡改它
-* 除非 onFinally 自己抛异常或返回一个 rejected Promise，否则最终链路会把 原来的结果 原封不动地传下去
+
+- 提供一个“无论成功还是失败都要执行的收尾钩子
+- 只在 原 Promise 已经 settled（fulfilled / rejected）后调用 onFinally
+- onFinally 不接收 上一步的值/错，也无法篡改它
+- 除非 onFinally 自己抛异常或返回一个 rejected Promise，否则最终链路会把 原来的结果 原封不动地传下去
 
 ```js[finally.js]
 Promise.prototype.finally = function (callback) {
@@ -445,7 +454,8 @@ Promise.prototype.finally = function (callback) {
 ```
 
 ### all
-all的参数是一个数组，数组中可以放promise，也可以放普通值，返回的是一个promise，这个promise的状态是根据数组中所有promise的状态来决定的,如果有任何一个失败，则返回的promise失败，如果都成功，则返回的promise成功
+
+all 的参数是一个数组，数组中可以放 promise，也可以放普通值，返回的是一个 promise，这个 promise 的状态是根据数组中所有 promise 的状态来决定的,如果有任何一个失败，则返回的 promise 失败，如果都成功，则返回的 promise 成功
 
 ```js[all.js]
 Promise.all = (promises) => {
@@ -477,8 +487,10 @@ Promise.all = (promises) => {
 
 module.exports = Promise;
 ```
+
 ### allSettled
-allSettled的参数是一个数组，数组中可以放promise，也可以放普通值，返回的是一个promise，这个promise的状态是根据数组中所有promise的状态来决定的，不管成功还是失败，都会返回一个数组，数组中是每个promise的结果
+
+allSettled 的参数是一个数组，数组中可以放 promise，也可以放普通值，返回的是一个 promise，这个 promise 的状态是根据数组中所有 promise 的状态来决定的，不管成功还是失败，都会返回一个数组，数组中是每个 promise 的结果
 
 ```js[allSettled.js]
 Promise.allSettled = (promises) => {
@@ -508,7 +520,8 @@ Promise.allSettled = (promises) => {
 ```
 
 ### race
-race的参数是一个数组，数组中可以放promise，也可以放普通值，返回的是一个promise，这个promise的状态是根据数组中第一个完成的promise的状态来决定的,不管成功还是失败，就返回这个结果
+
+race 的参数是一个数组，数组中可以放 promise，也可以放普通值，返回的是一个 promise，这个 promise 的状态是根据数组中第一个完成的 promise 的状态来决定的,不管成功还是失败，就返回这个结果
 
 ```js[race.js]
 Promise.race = (promises) => {
@@ -526,8 +539,11 @@ Promise.race = (promises) => {
 }
 
 ```
+
 #### 应用
-* 超时处理
+
+- 超时处理
+
 ```js[timeout.js]
 const withSetTimeout = (promise,timeout) => {
     return Promise.race([
@@ -550,7 +566,9 @@ p.then((res) => {
     console.log(err)
 })
 ```
-* 手动取消
+
+- 手动取消
+
 ```js[cancel.js]
 const withAbort = (promise) => {
     const {promise:p,resolve,reject} = Promise.withResolvers()
@@ -579,7 +597,8 @@ setTimeout(() => {
 ```
 
 ### any
-any的参数是一个数组，数组中可以放promise，也可以放普通值，返回的是一个promise，如果有任何一个成功，则返回的promise成功，如果都失败，返回一个AggregateError错误
+
+any 的参数是一个数组，数组中可以放 promise，也可以放普通值，返回的是一个 promise，如果有任何一个成功，则返回的 promise 成功，如果都失败，返回一个 AggregateError 错误
 
 ```js[any.js]
 Promise.any = (promises) => {
@@ -607,6 +626,7 @@ Promise.any = (promises) => {
 ```
 
 ### try
+
 ```js[try.js]
 是用于捕获代码内同步的错误并丢给 catch
 Promise.try = function(fn) {
@@ -624,7 +644,7 @@ Promise.try = function(fn) {
     });
 }
 // sample:
-Promise.try(() => { 
+Promise.try(() => {
     throw new Error('error')
 }).catch((err) => {
     console.log(err)
@@ -632,7 +652,9 @@ Promise.try(() => {
 ```
 
 ### withResolvers
-* 方便resolve，reject方法在promise外部调用
+
+- 方便 resolve，reject 方法在 promise 外部调用
+
 ```js[withResolvers.js]
 Promise.withResolvers = function() {
     let resolve, reject;
@@ -648,9 +670,11 @@ Promise.withResolvers = function() {
 ```
 
 ## promisify
+
 > 将回调函数的形式转换为 promise 的形式
 
 ### 常见的手动封装方式
+
 ```js[commonjs.js]
 const fs = require('fs')
 const readFile = (path) => {
@@ -668,7 +692,9 @@ readFile('test.txt').then((data) => {
     console.log(err)
 })
 ```
-### 统一处理回调函数 也是基于node的api风格的封装
+
+### 统一处理回调函数 也是基于 node 的 api 风格的封装
+
 ```js[promiseify.js]
 const fs = require('fs')
 
@@ -689,8 +715,3 @@ readFile('test.txt').then((data) => {
     console.log(err)
 })
 ```
-
-
-
-
-

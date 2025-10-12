@@ -1,5 +1,5 @@
 ---
-{ "top": 1, "aside": true, "footer": true, "navbar": true, "sidebar": true }
+{ 'aside': true, 'footer': true, 'navbar': true, 'sidebar': true }
 ---
 
 # 项目开发二方包调试
