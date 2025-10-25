@@ -5,7 +5,8 @@ sticky: 2
 ---
 
 # babel 插件的实战-不同环境下文案的 diff
-
+## babel插件开发
+[babel插件开发掘金小册](https://juejin.cn/book/6946117847848321055?enter_from=course_center&utm_source=course_center)
 ## 背景
 
 老项目`(react+webpack)`中现有大量涉及到租户环境称谓的说明文案，对于不同的租户环境，需要做文案关键词的替换。例如：
